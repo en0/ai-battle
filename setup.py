@@ -17,8 +17,8 @@ setup(
     install_requires=[
         "pygame==2.1.2",
         "pyioc3==1.3.0",
-        ],
-    packages=["airena"],
+    ],
+    packages=["airena","airena.components","airena.services"],
     classifiers=[
         "Programming Language :: Python :: 3.8",
         "License :: OSI Approved :: MIT License",
