@@ -15,7 +15,7 @@ class AiBase(GameComponent):
 
     @property
     def enemies(self):
-        return self._obj.get_objects_by_tag("Tanks")
+        return [t for t in self._obj.get_objects_by_tag("Tank") if t is not self.game_object]
 
     def startup(self):
         self._bm = self.game_object[BotMotion]
