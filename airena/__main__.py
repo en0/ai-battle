@@ -80,7 +80,7 @@ if __name__ == "__main__":
         mod = importlib.util.module_from_spec(spec)
         mod = importlib.import_module(basename(p)[:-3], mod)
         for name, mem in inspect.getmembers(mod):
-            if inspect.isclass(mem) and mem is not AiBase:
+            if inspect.isclass(mem) and mem is not AiBase and issubclass(mem, AiBase):
                 ai.append(mem)
 
     pygame.init()
