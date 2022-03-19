@@ -35,7 +35,7 @@ class Game:
 
     def __init__(self, ai):
         builder = ServiceBuilder()
-        builder.with_screen((500, 500))
+        builder.with_screen((1000, 1000))
         for a in ai:
             builder.using_component(a)
         self.bus = builder.get_provider(IMessageService)
@@ -47,18 +47,18 @@ class Game:
         self.obj = builder.get_provider(IObjectService)
 
         spawn_locations = [
-            Vector2(150, 150),
-            Vector2(350, 150),
-            Vector2(150, 350),
-            Vector2(350, 350),
+            (Vector2(100, 100), 0.75),
+            (Vector2(900, 900), -2.25),
+            (Vector2(100, 900), -0.75),
+            (Vector2(900, 100), 2.25),
         ]
 
-        for loc, a in zip(spawn_locations, ai):
-            self.obj.spawn("Tank", {
+        for (loc, rot), a in zip(spawn_locations, ai):
+            x = self.obj.spawn("Tank", {
                 a.__name__: None,
                 "TankRenderer": {"color": a.color},
                 "BotMotion": None,
-                "Transform": {"position": loc},
+                "Transform": {"position": loc, "rotation": rot},
                 "Boundary": {"height": 10, "width": 10, "collidable": True}
             })
 
