@@ -2,7 +2,7 @@ from unittest import TestCase
 from unittest.mock import Mock
 from airena.builder import ServiceBuilder
 from airena.typing import IObjectService, IDisplayService
-from airena.lib import Vector2
+from airena.vector import Vector2
 
 from airena import components
 

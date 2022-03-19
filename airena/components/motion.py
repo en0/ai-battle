@@ -1,6 +1,6 @@
 from typing import Optional
 from ..game_component import GameComponent
-from ..lib import Vector2
+from ..vector import Vector2
 from ..typing import IClockService, IDisplayService, IObjectService
 
 from .transform import Transform

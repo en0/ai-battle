@@ -2,7 +2,7 @@ import pygame
 
 from ..typing import IKeyboardService
 from ..game_component import GameComponent
-from ..lib import Vector2
+from ..vector import Vector2
 
 from .transform import Transform
 from .bot_motion import BotMotion

@@ -1,5 +1,5 @@
 from unittest import TestCase
-from airena.lib import Vector2
+from airena.vector import Vector2
 
 
 class Vector2Tests(TestCase):

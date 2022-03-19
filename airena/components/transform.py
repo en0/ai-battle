@@ -1,6 +1,6 @@
 from math import cos, sin
 from ..game_component import GameComponent
-from ..lib import Vector2
+from ..vector import Vector2
 
 
 class Transform(GameComponent):

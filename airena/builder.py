@@ -4,7 +4,7 @@ from pyioc3 import Container, StaticContainerBuilder, ScopeEnum
 from typing import TypeVar, Type, Optional, NamedTuple, Union, Callable
 
 from . import components, services
-from .lib import Vector2
+from .vector import Vector2
 from .typing import (
     PROVIDER_T,
     IDisplayService,

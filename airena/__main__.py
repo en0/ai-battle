@@ -2,7 +2,7 @@ import pygame
 from argparse import ArgumentParser
 from .components import Transform
 from .builder import ServiceBuilder
-from .lib import Vector2
+from .vector import Vector2
 from .typing import (
     IMessageService,
     IClockService,
