@@ -13,6 +13,10 @@ class GameObject(IGameObject):
         return self._owner
 
     @property
+    def alive(self) -> bool:
+        return self._alive
+
+    @property
     def tag(self) -> str:
         return self._tag
 
@@ -21,10 +25,12 @@ class GameObject(IGameObject):
             component.update()
 
     def startup(self) -> None:
+        self._alive = True
         for component in self._components.values():
             component.startup()
 
     def shutdown(self) -> None:
+        self._alive = False
         for component in self._components.values():
             component.shutdown()
 
@@ -52,6 +58,7 @@ class GameObject(IGameObject):
     def __init__(self, tag: str, components: Dict[Type[COMPONENT_T], COMPONENT_T] = None, owner: IGameObject = None):
         self._tag = tag
         self._owner = owner
+        self._alive = False
         self._components: Dict[Type[COMPONENT_T], COMPONENT_T] = {}
         for anno, comp in (components or {}).items():
             self[anno] = comp

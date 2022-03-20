@@ -35,13 +35,11 @@ class AiBase(GameComponent):
     def facing(self):
         return self._xfr.facing
 
-    @property
     def has_move_to_target(self):
-        return self._bm.has_move_toward_target
+        return self._bm.has_move_toward_target()
 
-    @property
     def has_focus(self):
-        return self._bm.has_focus
+        return self._bm.has_focus()
 
     def get_vector(
         self,

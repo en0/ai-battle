@@ -49,6 +49,11 @@ class IGameObject(ABC):
 
     @property
     @abstractmethod
+    def alive(self) -> bool:
+        ...
+
+    @property
+    @abstractmethod
     def tag(self) -> str:
         ...
 
