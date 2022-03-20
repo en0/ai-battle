@@ -73,6 +73,7 @@ class BotMotion(GameComponent):
             return
         if go.tag == "Bullet":
             self._obj.kill(self.game_object)
+            self._obj.kill(go)
 
     def _fire_maybe(self):
         if not self._fire_bullet:
