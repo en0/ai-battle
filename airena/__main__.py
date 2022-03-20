@@ -57,7 +57,12 @@ class Game:
             x = self.obj.spawn("Tank", {
                 a.__name__: None,
                 "TankRenderer": {"color": a.color},
-                "BotMotion": None,
+                "BotMotion": {
+                    "fire_cooldown": 1000,
+                    "bullet_speed": 300,
+                    "turn_speed": 3,
+                    "move_speed": 250,
+                },
                 "Transform": {"position": loc, "rotation": rot},
                 "Boundary": {"height": 10, "width": 10, "collidable": True}
             })
