@@ -122,11 +122,10 @@ class BotMotion(GameComponent):
     def _get_forward_velocity(self) -> Vector2:
         if self._move_to_target:
             target_v = (self._move_to_target - self._xfr.position)
-            target_v_n = target_v.normalize()
-            if target_v.magnitude() < target_v_n.magnitude():
+            if target_v.magnitude() < 2:
                 self._move_to_target = None
-                return target_v
-            return (target_v_n * self._clk.frame_delay * self.move_speed)
+                return target_v * self._clk.frame_delay * self.move_speed
+            return target_v.normalize() * self._clk.frame_delay * self.move_speed
 
         ret = self._move_vector
         self._move_vector = Vector2.zero()
