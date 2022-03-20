@@ -33,7 +33,7 @@ class Game:
             pygame.display.flip()
             self.clock.update(60)
 
-    def __init__(self, ai):
+    def __init__(self, ai, bullet_motion_preset: dict):
         builder = ServiceBuilder()
         builder.with_screen((1000, 1000))
         for a in ai:
@@ -57,12 +57,7 @@ class Game:
             x = self.obj.spawn("Tank", {
                 a.__name__: None,
                 "TankRenderer": {"color": a.color},
-                "BotMotion": {
-                    "fire_cooldown": 1000,
-                    "bullet_speed": 300,
-                    "turn_speed": 3,
-                    "move_speed": 250,
-                },
+                "BotMotion": bullet_motion_preset,
                 "Transform": {"position": loc, "rotation": rot},
                 "Boundary": {"height": 10, "width": 10, "collidable": True}
             })
@@ -71,6 +66,10 @@ class Game:
 if __name__ == "__main__":
 
     ap = ArgumentParser()
+    ap.add_argument("--fire-cooldown", type=float, default=1000)
+    ap.add_argument("--bullet-speed", type=float, default=300)
+    ap.add_argument("--turn-speed", type=float, default=3)
+    ap.add_argument("--move-speed", type=float, default=200)
     ap.add_argument("bot", nargs="*")
     args = ap.parse_args()
 
@@ -89,6 +88,11 @@ if __name__ == "__main__":
                 ai.append(mem)
 
     pygame.init()
-    g = Game(ai)
+    g = Game(ai,{
+        "fire_cooldown": args.fire_cooldown,
+        "bullet_speed": args.bullet_speed,
+        "turn_speed": args.turn_speed,
+        "move_speed": args.move_speed,
+    })
     g.run()
 
