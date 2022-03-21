@@ -3,7 +3,7 @@ import inspect
 from pyioc3 import Container, StaticContainerBuilder, ScopeEnum
 from typing import TypeVar, Type, Optional, NamedTuple, Union, Callable
 
-from . import components, services
+from . import components, services, scenes
 from .vector import Vector2
 from .typing import (
     PROVIDER_T,
@@ -14,10 +14,13 @@ from .typing import (
     IClockService,
     IServiceBuilder,
     IObjectService,
+    ISceneService,
+    IScene,
 )
 
 
 ACTIVATE_DELEGATE = Callable[["ServiceBuilder", PROVIDER_T], PROVIDER_T]
+
 
 class ServiceBuilder(IServiceBuilder):
 
@@ -34,11 +37,20 @@ class ServiceBuilder(IServiceBuilder):
             anno = anno.__name__
         return self.get_provider(anno)
 
+    def get_scene(self, anno: Type[IScene]) -> IScene:
+        return self.get_provider(anno)
+
     def using_component(
         self,
         component_type: Type[PROVIDER_T]
     ) -> None:
         self.using_provider(component_type, component_type.__name__, scope=ScopeEnum.TRANSIENT)
+
+    def using_scene(
+        self,
+        scene_type: Type[IScene]
+    ) -> None:
+        self.using_provider(scene_type, scene_type, scope=ScopeEnum.TRANSIENT)
 
     def using_provider(
         self,
@@ -102,24 +114,34 @@ class ServiceBuilder(IServiceBuilder):
             if inspect.isclass(obj) and issubclass(obj, IGameComponent):
                 self.using_component(obj)
 
+        # Bind all the built-in scenes
+        for _, scn in inspect.getmembers(scenes):
+            if inspect.isclass(scn) and issubclass(scn, IScene):
+                self.using_scene(scn)
+
         self.using_provider(
             services.MessageService,
             IMessageService,
-            ScopeEnum.SINGLETON)
+            ScopeEnum.REQUESTED)
 
         self.using_provider(
             services.KeyboardService,
             IKeyboardService,
-            ScopeEnum.SINGLETON)
+            ScopeEnum.REQUESTED)
 
         self.using_provider(
             services.ClockService,
             IClockService,
-            ScopeEnum.SINGLETON)
+            ScopeEnum.REQUESTED)
 
         self.using_provider(
             services.ObjectService,
             IObjectService,
+            ScopeEnum.REQUESTED)
+
+        self.using_provider(
+            services.SceneService,
+            ISceneService,
             ScopeEnum.SINGLETON)
 
     def __init__(self):

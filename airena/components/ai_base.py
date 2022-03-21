@@ -18,7 +18,7 @@ class AiBase(GameComponent):
 
     @property
     def enemies(self):
-        return [t for t in self._obj.get_objects_by_tag("Tank") if t is not self.game_object]
+        return []
 
     def startup(self):
         self._xfr = self.game_object[Transform]
@@ -39,6 +39,5 @@ class AiBase(GameComponent):
         self.initialize()
         self.think()
 
-    def __init__(self, obj: IObjectService):
-        self._obj = obj
+    def __init__(self):
         self._update = self._initialize

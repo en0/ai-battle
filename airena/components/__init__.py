@@ -1,6 +1,5 @@
 from .box_collider import BoxCollider
 from .bullet_sprite import BulletSprite
-from .debug_control import DebugControl
 from .meta import Meta
 from .projectile import Projectile
 from .tank import Tank

@@ -18,12 +18,8 @@ class Projectile(GameComponent):
         self._box.on_collision(self._destroy_projectile)
 
     def update(self) -> None:
-        self._xfr.position += (self.vector * self._clk.frame_delay)
+        self._xfr.position += (self.vector * self.frame_delay)
 
     def _destroy_projectile(self, *a):
-        self._obj.kill(self.game_object)
-
-    def __init__(self, clk: IClockService, obj: IObjectService) -> None:
-        self._clk = clk
-        self._obj = obj
+        self.kill_object(self.game_object)
 

@@ -25,7 +25,7 @@ class Tank(GameComponent):
 
     @property
     def can_fire(self) -> bool:
-        return self._clk.now_ms >= self._next_fire_ts
+        return self.now_ms >= self._next_fire_ts
 
     def fire(self) -> None:
         if self.can_fire:
@@ -61,7 +61,7 @@ class Tank(GameComponent):
         if go[Meta].type == "Bullet":
             self._props["health"] -= go[Meta].props["damage"]
             if self._props["health"] <= 0:
-                self._obj.kill(self.game_object)
+                self.kill_object(self.game_object)
 
     def _do_fire(self) -> None:
         if self.can_fire and self._fire_bullet:
@@ -72,35 +72,30 @@ class Tank(GameComponent):
             ) + self._xfr.position
 
             self._fire_bullet = False
-            self._next_fire_ts = self._clk.now_ms + self._props["fire_cooldown"]
-            self._obj.spawn(bullet_preset(
+            self._next_fire_ts = self.now_ms + self._props["fire_cooldown"]
+            self.spawn_object(bullet_preset(
                 position=bullet_position,
                 rotation=self._props["hat_rotation"],
                 vector=Vector2.from_rotation(self._props["hat_rotation"]),
                 speed=self._props["bullet_speed"],
-                color=self._spr.color))
+                color=self._spr.color), self.game_object)
 
     def _do_turn(self) -> None:
         turn_speed = self._props["turn_speed"]
-        rotation = self._turn_vector * turn_speed * self._clk.frame_delay
+        rotation = self._turn_vector * turn_speed * self.frame_delay
         self._xfr.rotation += rotation
         self._props["hat_rotation"] += rotation
         self._turn_vector = 0
 
     def _do_hat_turn(self) -> None:
         turn_speed = self._props["turn_speed"]
-        rotation = self._hat_turn_vector * turn_speed * self._clk.frame_delay
+        rotation = self._hat_turn_vector * turn_speed * self.frame_delay
         self._props["hat_rotation"] += rotation
         self._hat_turn_vector = 0
 
     def _do_move(self) -> None:
         move_speed = self._props["movement_speed"]
-        vector = self._movement_vector * move_speed * self._clk.frame_delay
+        vector = self._movement_vector * move_speed * self.frame_delay
         self._xfr.position += vector
         self._movement_vector = 0
-
-    def __init__(self, clk: IClockService, obj: IObjectService) -> None:
-        self._clk = clk
-        self._obj = obj
-
 

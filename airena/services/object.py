@@ -5,16 +5,30 @@ from ..typing import IServiceBuilder, IObjectService, IGameObject, COMPONENT_T, 
 
 class ObjectService(IObjectService):
 
-    def spawn(self, preset: Dict[str, Dict[str, Any]], owner: IGameObject = None) -> IGameObject:
-        comps = [self._load_component(c, a) for c, a in preset.items()]
-        go = GameObject({c.__class__: c for c in comps}, owner)
-        go.startup()
+    @property
+    def all_objects(self) -> List[IGameObject]:
+        return self._alive.copy()
+
+    def add_object(self, go: IGameObject) -> None:
         self._alive.append(go)
+        #self._alive_by_tag.setdefault(go.tag, set()).add(go)
         if go.collider:
             self._collidable.append(go.collider)
+
+    def remove_object(self, go: IGameObject) -> None:
+        self._alive.remove(go)
+        #self._alive_by_tag[go.tag].remove(go)
+        if go.collider:
+            self._collidable.remove(go.collider)
+
+    def spawn_object(self, preset: Dict[str, Dict[str, Any]], owner: IGameObject = None) -> IGameObject:
+        comps = [self._load_component(c, a) for c, a in preset.items()]
+        go = GameObject(owner, {c.__class__: c for c in comps})
+        go.startup()
+        self.add_object(go)
         return go
 
-    def kill(self, go: IGameObject) -> None:
+    def kill_object(self, go: IGameObject) -> None:
         self._to_kill.append(go)
 
     def update(self):
@@ -22,16 +36,10 @@ class ObjectService(IObjectService):
         self._do_updates()
         self._do_collisions()
 
-    def get_objects_by_tag(self, tag) -> List[IGameObject]:
-        return self._alive_by_tag.get(tag, [])
-
     def _do_kills(self):
         for go in self._to_kill:
             go.shutdown()
-            self._alive.remove(go)
-            #self._alive_by_tag[go.tag].remove(go)
-            if go.collider:
-                self._collidable.remove(go.collider)
+            self.remove_object(go)
         if self._to_kill:
             self._to_kill.clear()
 

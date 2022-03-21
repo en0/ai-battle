@@ -46,7 +46,9 @@ def tank_preset(
     return {
         "Meta": {"type": "Tank", "props": props},
         "Transform": {"position": position, "rotation": rotation},
-        controler.__name__: None,
+        controler.__name__
+        if isinstance(controler, IGameComponent)
+        else controler: None,
         "Tank": None,
         "TankSprite": {"color": color},
         "BoxCollider": {"size": (props["hat_radius"] * 2, props["hat_radius"] * 2)},
