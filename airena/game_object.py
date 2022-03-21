@@ -1,8 +1,9 @@
-from typing import Type, Optional, Dict
+from typing import Type, Optional, Dict, List
 from .typing import (
     COMPONENT_T,
     IGameObject,
     IGameComponent,
+    ICollider,
 )
 
 
@@ -17,8 +18,8 @@ class GameObject(IGameObject):
         return self._alive
 
     @property
-    def tag(self) -> str:
-        return self._tag
+    def collider(self) -> ICollider:
+        return self._collider
 
     def update(self) -> None:
         for component in self._components.values():
@@ -43,6 +44,8 @@ class GameObject(IGameObject):
         if name in self:
             del self[name]
         self._components[name] = value
+        if issubclass(name, ICollider):
+            self._collider = value
         value.game_object = self
 
     def __getitem__(self, name: Type[COMPONENT_T]) -> COMPONENT_T:
@@ -52,14 +55,17 @@ class GameObject(IGameObject):
         return name in self._components
 
     def __delitem__(self, name: Type[COMPONENT_T]) -> None:
-        self._components[name].game_object = None
+        val = self._components[name]
+        val.game_object = None
         del self._components[name]
+        if val is self._collider:
+            self._collider = None
 
-    def __init__(self, tag: str, components: Dict[Type[COMPONENT_T], COMPONENT_T] = None, owner: IGameObject = None):
-        self._tag = tag
+    def __init__(self, components: Dict[Type[COMPONENT_T], COMPONENT_T] = None, owner: IGameObject = None):
         self._owner = owner
         self._alive = False
         self._components: Dict[Type[COMPONENT_T], COMPONENT_T] = {}
+        self._collider: ICollider = None
         for anno, comp in (components or {}).items():
             self[anno] = comp
 

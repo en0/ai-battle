@@ -1,5 +1,5 @@
 from typing import NamedTuple, Union
-from math import pow, sqrt
+from math import pow, sqrt, cos, sin, atan2
 
 
 _magv2 = lambda a: sqrt(pow(abs(a[0]), 2) + pow(abs(a[1]), 2))
@@ -14,8 +14,26 @@ class Vector2(NamedTuple):
     def zero() -> "Vector2":
         return Vector2(0, 0)
 
+    @staticmethod
+    def from_rotation(rotation: float, magnitude: float = 1) -> "Vector2":
+        return Vector2(
+            cos(rotation) * magnitude,
+            sin(rotation) * magnitude)
+
+    def __bool__(self) -> bool:
+        return self.x != 0 and self.y != 0
+
     def __repr__(self):
         return f"<Vector2 ({self.x}, {self.y})>"
+
+    def __neg__(self):
+        return Vector2(-self.x, -self.y)
+
+    def __pos__(self):
+        return Vector2(+self.x, +self.y)
+
+    def __invert__(self):
+        return Vector2(~self.x, ~self.y)
 
     def __add__(self, other):
         if isinstance(other, Vector2) or isinstance(other, tuple):
@@ -55,3 +73,8 @@ class Vector2(NamedTuple):
             return Vector2(self.x/k, self.y/k)
         else:
             return Vector2(0, 0)
+
+    def rotate(self, rotation: float) -> None:
+        rotation = atan2(self.x, self.y) + rotation
+        magnitude = self.magnitude()
+        return Vector2.from_rotation(rotation, magnitude)

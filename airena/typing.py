@@ -1,6 +1,6 @@
 import pygame
 from abc import ABC, abstractmethod
-from typing import TypeVar, Type, Optional, Callable, Iterable, List, Dict, Any, Union
+from typing import TypeVar, Type, Optional, Callable, Iterable, List, Dict, Any, Union, Tuple
 
 
 PROVIDER_T = TypeVar("TYPE_T")
@@ -54,7 +54,7 @@ class IGameObject(ABC):
 
     @property
     @abstractmethod
-    def tag(self) -> str:
+    def collider(self) -> "ICollider":
         ...
 
     @abstractmethod
@@ -138,6 +138,7 @@ class IClockService(ABC):
     @property
     @abstractmethod
     def frame_rate(self) -> float: ...
+
     @property
     @abstractmethod
     def now_ms(self) -> int: ...
@@ -167,7 +168,7 @@ class IObjectService(ABC):
         ...
 
     @abstractmethod
-    def spawn(self, tag: str, preset: Dict[str, Dict[str, Any]], owner: IGameObject = None) -> IGameObject:
+    def spawn(self, preset: Dict[str, Dict[str, Any]], owner: IGameObject = None) -> IGameObject:
         ...
 
     @abstractmethod
@@ -176,4 +177,26 @@ class IObjectService(ABC):
 
     @abstractmethod
     def update(self) -> None:
+        ...
+
+
+CollisionDelegate = Callable[[IGameObject], None]
+
+
+class ICollider(IGameComponent):
+
+    @abstractmethod
+    def check_collision(self, game_object: IGameObject) -> None:
+        ...
+
+    @abstractmethod
+    def collide_rect(self, rect: pygame.Rect) -> bool:
+        ...
+
+    @abstractmethod
+    def collide_point(self, point: Tuple[float, float]) -> bool:
+        ...
+
+    @abstractmethod
+    def on_collision(self, callback: CollisionDelegate) -> None:
         ...

@@ -1,6 +1,7 @@
 import pygame
 from argparse import ArgumentParser
-from .components import Transform
+from .presets import tank_preset
+from .components import Transform, DebugControl, NoOp
 from .builder import ServiceBuilder
 from .vector import Vector2
 from .typing import (
@@ -19,12 +20,21 @@ class Game:
     def stop(self):
         self._playing = False
 
-    def kill_player(self):
-        if self.player:
-            self.obj.kill(self.player)
-            self.player = None
-
     def run(self):
+        self.obj.spawn(tank_preset(
+            controler=DebugControl,
+            position=(100, 100),
+            rotation=0,
+            color=(0, 0, 255),
+            #props={"bullet_speed":600}
+        ))
+        self.obj.spawn(tank_preset(
+            controler=NoOp,
+            position=(500, 500),
+            rotation=0,
+            color=(255, 0, 0),
+            #props={"bullet_speed":600}
+        ))
         self._playing = True
         while self._playing:
             self.bus.update(pygame.event.get())
@@ -32,6 +42,10 @@ class Game:
             self.obj.update()
             pygame.display.flip()
             self.clock.update(60)
+
+    def _toggle_bounding_box(self, *a):
+        from .components import BoxCollider
+        BoxCollider.show_bounding_box = ~BoxCollider.show_bounding_box
 
     def __init__(self, ai, bullet_motion_preset: dict):
         builder = ServiceBuilder()
@@ -42,8 +56,8 @@ class Game:
         self.bus.register_callback(pygame.QUIT, lambda x: self.stop())
         self.screen = builder.get_provider(IDisplayService)
         self.clock = builder.get_provider(IClockService)
-        self.kb = builder.get_provider(IKeyboardService)
-        self.kb.register_callback(pygame.K_0, lambda *_: self.kill_player())
+        self.kbd = builder.get_provider(IKeyboardService)
+        self.kbd.register_callback(pygame.K_0, self._toggle_bounding_box)
         self.obj = builder.get_provider(IObjectService)
 
         spawn_locations = [
@@ -54,13 +68,12 @@ class Game:
         ]
 
         for (loc, rot), a in zip(spawn_locations, ai):
-            x = self.obj.spawn("Tank", {
-                a.__name__: None,
-                "TankRenderer": {"color": a.color},
-                "BotMotion": bullet_motion_preset,
-                "Transform": {"position": loc, "rotation": rot},
-                "Boundary": {"height": 10, "width": 10, "collidable": True}
-            })
+            self.obj.spawn(tank_preset(
+                controler=a,
+                position=loc,
+                rotation=rot,
+                color=a.color,
+            ))
 
 
 if __name__ == "__main__":
