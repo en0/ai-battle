@@ -7,15 +7,15 @@ from . import components, services, scenes
 from .vector import Vector2
 from .typing import (
     PROVIDER_T,
-    IDisplayService,
     IGameComponent,
     IMessageService,
     IKeyboardService,
     IClockService,
     IServiceBuilder,
     IObjectService,
-    ISceneService,
     IScene,
+    ISceneService,
+    IScreenService,
 )
 
 
@@ -78,17 +78,23 @@ class ServiceBuilder(IServiceBuilder):
             value=val,
         )
 
-    def with_screen(self, size: Vector2):
+    def with_screen(
+        self,
+        size: Vector2,
+        flags: int = 0,
+        display: int = 0,
+        vsync: int = 0,
+    ):
 
-        def setup_screen(*args):
-            surface = pygame.display.set_mode(size)
-            return surface
+        def setup_screen(b, inst):
+            inst.activate(size, flags, display, vsync)
+            return inst
 
         self.using_provider(
-            impl=lambda:None,
-            anno=IDisplayService,
+            impl=services.ScreenService,
+            anno=IScreenService,
             scope=ScopeEnum.SINGLETON,
-            on_activate=setup_screen
+            on_activate=setup_screen,
         )
 
     def _assert_not_built(self):

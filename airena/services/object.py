@@ -1,6 +1,13 @@
-from typing import Dict, Any, Iterable, List, Type, Set
+from typing import Dict, Any, Iterable, List, Type, Set, Deque
+from collections import deque
 from ..game_object import GameObject
-from ..typing import IServiceBuilder, IObjectService, IGameObject, COMPONENT_T, ICollider
+from ..typing import (
+    COMPONENT_T,
+    ICollider,
+    IGameObject,
+    IObjectService,
+    IServiceBuilder,
+)
 
 
 class ObjectService(IObjectService):
@@ -8,18 +15,6 @@ class ObjectService(IObjectService):
     @property
     def all_objects(self) -> List[IGameObject]:
         return self._alive.copy()
-
-    def add_object(self, go: IGameObject) -> None:
-        self._alive.append(go)
-        #self._alive_by_tag.setdefault(go.tag, set()).add(go)
-        if go.collider:
-            self._collidable.append(go.collider)
-
-    def remove_object(self, go: IGameObject) -> None:
-        self._alive.remove(go)
-        #self._alive_by_tag[go.tag].remove(go)
-        if go.collider:
-            self._collidable.remove(go.collider)
 
     def spawn_object(self, preset: Dict[str, Dict[str, Any]], owner: IGameObject = None) -> IGameObject:
         comps = [self._load_component(c, a) for c, a in preset.items()]
@@ -29,19 +24,26 @@ class ObjectService(IObjectService):
         return go
 
     def kill_object(self, go: IGameObject) -> None:
-        self._to_kill.append(go)
+        self._to_kill.appendleft(go)
+
+    def add_object(self, go: IGameObject) -> None:
+        self._to_add.appendleft(go)
+
+    def remove_object(self, go: IGameObject) -> None:
+        self._to_remove.appendleft(go)
 
     def update(self):
-        self._do_kills()
+        self._do_adds()
         self._do_updates()
         self._do_collisions()
+        self._do_kills()
+        self._do_removes()
 
-    def _do_kills(self):
-        for go in self._to_kill:
-            go.shutdown()
-            self.remove_object(go)
-        if self._to_kill:
-            self._to_kill.clear()
+
+    def _do_adds(self):
+        while self._to_add:
+            go = self._to_add.pop()
+            self._add_object(go)
 
     def _do_updates(self):
         for go in self._alive:
@@ -55,15 +57,40 @@ class ObjectService(IObjectService):
                 a.check_collision(b.game_object)
                 b.check_collision(a.game_object)
 
+    def _do_kills(self):
+        while self._to_kill:
+            go = self._to_kill.pop()
+            go.shutdown()
+            self._remove_object(go)
+
+    def _do_removes(self):
+        while self._to_remove:
+            go = self._to_remove.pop()
+            self._remove_object(go)
+
+    def _add_object(self, go):
+        self._alive.appendleft(go)
+        if go.collider:
+            self._collidable.appendleft(go.collider)
+
+    def _remove_object(self, go):
+        self._alive.remove(go)
+        if go.collider:
+            self._collidable.remove(go.collider)
+
     def _load_component(self, comp_t, args):
-        comp = self._loc.get_component(comp_t)
+        comp = self.srv_builder.get_component(comp_t)
         for name, val in (args or {}).items():
             setattr(comp, name, val)
         return comp
 
     def __init__(self, builder: IServiceBuilder):
-        self._loc = builder
-        self._alive: List[IGameObject] = []
-        self._to_kill: List[IGameObject] = []
-        self._collidable: List[ICollider] = []
+        self.srv_builder = builder
+
+        self._to_add: Deque[IGameObject] = deque()
+        self._to_kill: Deque[IGameObject] = deque()
+        self._to_remove: Deque[IGameObject] = deque()
+
+        self._alive: Deque[IGameObject] = deque()
+        self._collidable: Deque[ICollider] = deque()
         self._alive_by_tag: Dict[str, IGameObject] = {}

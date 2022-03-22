@@ -1,5 +1,5 @@
 import pygame
-from typing import Callable, Iterable
+from typing import Callable, Iterable, Any
 
 from ..typing import IMessageService, CallbackDelegate, FilterDelegate
 
@@ -23,6 +23,10 @@ class MessageService(IMessageService):
                     to_remove.append((t, c, p))
         for t, c, p in to_remove:
             self._callbacks[t].remove((c, p))
+
+    def broadcast(self, name: str, **data):
+        event = pygame.event.Event(pygame.USEREVENT, name=name, **data)
+        pygame.event.post(event)
 
     def update(self, events: Iterable[pygame.event.Event]):
         for event in events:

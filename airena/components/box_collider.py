@@ -2,7 +2,7 @@ from pygame import draw, Rect, K_0
 from typing import Callable, List, Tuple
 
 from ..vector import Vector2
-from ..typing import IDisplayService, IGameObject, ICollider, CollisionDelegate
+from ..typing import IGameObject, ICollider, CollisionDelegate
 from ..game_component import GameComponent
 
 from .transform import Transform
@@ -37,7 +37,7 @@ class BoxCollider(GameComponent, ICollider):
         self._rect = Rect(self.offset, self.size)
         self._rect.center = self._xfr.position
         if BoxCollider.show_bounding_box:
-            draw.rect(self._gfx, (255, 255, 255), self._rect, 1)
+            draw.rect(self.screen, (255, 255, 255), self._rect, 1)
 
     def startup(self) -> None:
         self._xfr = self.game_object[Transform]
@@ -46,6 +46,5 @@ class BoxCollider(GameComponent, ICollider):
         for cb in self._callbacks:
             cb(game_object)
 
-    def __init__(self, gfx: IDisplayService):
-        self._gfx = gfx
+    def __init__(self):
         self._callbacks = []

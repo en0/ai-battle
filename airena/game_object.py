@@ -1,4 +1,6 @@
+import pygame
 from typing import Type, Optional, Dict, List, Any
+from .vector import Vector2
 from .typing import (
     COMPONENT_T,
     CallbackDelegate,
@@ -64,6 +66,16 @@ class GameObject(IGameObject):
         del self._components[name]
         if val is self._collider:
             self._collider = None
+
+    # IUnifiedScreenServiceInterface
+
+    @property
+    def surface(self) -> pygame.Surface:
+        return self._owner.surface
+
+    @property
+    def screen_flags(self) -> int:
+        return self._owner.screen_flags
 
     # IUnifiedSceneServiceInterface
 
@@ -132,6 +144,9 @@ class GameObject(IGameObject):
 
     def unregister_callback(self, callback: CallbackDelegate) -> None:
         self._owner.unregister_callback(callback)
+
+    def broadcast(self, name: str, **data):
+        self._owner.broadcast(name, **data)
 
     def __init__(
         self,

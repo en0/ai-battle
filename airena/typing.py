@@ -1,4 +1,5 @@
 import pygame
+from .vector import Vector2
 from abc import ABC, abstractmethod
 from typing import TypeVar, Type, Optional, Callable, Iterable, List, Dict, Any, Union, Tuple
 
@@ -10,8 +11,6 @@ KbCallbackDelegate = Callable[[int, int, int], None]
 CallbackDelegate = Callable[[pygame.event.Event], None]
 FilterDelegate = Callable[[pygame.event.Event], bool]
 CollisionDelegate = Callable[["IGameObject"], None]
-
-IDisplayService = pygame.Surface
 
 
 class IGame(ABC):
@@ -35,6 +34,24 @@ class IServiceBuilder(ABC):
     ) -> "IGameComponent": ...
 
 
+class IUnifiedScreenServiceInterface(ABC):
+
+    @property
+    @abstractmethod
+    def surface(self) -> pygame.Surface: ...
+
+    @property
+    @abstractmethod
+    def screen_flags(self) -> int: ...
+
+
+class IScreenService(IUnifiedScreenServiceInterface):
+
+    @abstractmethod
+    def update(self) -> None:
+        ...
+
+
 class IUnifiedMessageServiceInterface(ABC):
 
     @abstractmethod
@@ -47,6 +64,9 @@ class IUnifiedMessageServiceInterface(ABC):
 
     @abstractmethod
     def unregister_callback(self, callback: CallbackDelegate) -> None: ...
+
+    @abstractmethod
+    def broadcast(self, name: str, data: Any): ...
 
 
 class IMessageService(IUnifiedMessageServiceInterface):
@@ -151,6 +171,7 @@ class ISceneService(IUnifiedSceneServiceInterface):
 
 
 class IUnifiedServiceInterface(
+    IUnifiedScreenServiceInterface,
     IUnifiedSceneServiceInterface,
     IUnifiedObjectServiceInterface,
     IUnifiedClockServiceInterface,

@@ -4,15 +4,7 @@ from .presets import tank_preset
 from .scenes import Battle
 from .builder import ServiceBuilder
 from .vector import Vector2
-from .typing import (
-    IClockService,
-    IDisplayService,
-    IGame,
-    IKeyboardService,
-    IMessageService,
-    IObjectService,
-    ISceneService,
-)
+from .typing import IGame, ISceneService
 
 
 class Game(IGame):
@@ -26,9 +18,7 @@ class Game(IGame):
         self._playing = True
         self.scn.push_scene(Battle)
         while self._playing:
-            self.screen.fill((0, 0, 0))
             self.scn.update()
-            pygame.display.flip()
         self.scn.pop_scene()
 
     def _toggle_bounding_box(self, *a):
@@ -41,7 +31,6 @@ class Game(IGame):
         builder.with_screen((1000, 1000))
         for a in ai:
             builder.using_component(a)
-        self.screen = builder.get_provider(IDisplayService)
         self.scn = builder.get_provider(ISceneService)
 
 

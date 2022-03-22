@@ -1,7 +1,6 @@
 from pygame import draw, Rect
 from typing import Dict, Any
 
-from ..typing import IDisplayService
 from ..game_component import GameComponent
 from ..vector import Vector2
 
@@ -13,7 +12,6 @@ class TankSprite(GameComponent):
 
     _props: Dict[str, Any]
 
-    _gfx: IDisplayService = None
     _xfr: Transform = None
 
     color = (255, 255, 255)
@@ -22,7 +20,7 @@ class TankSprite(GameComponent):
 
         # body
         draw.polygon(
-            self._gfx,
+            self.surface,
             self.color,
             self._compute_poly(),
             self._props["body_thinkness"]
@@ -30,14 +28,14 @@ class TankSprite(GameComponent):
 
         # Hat
         draw.circle(
-            self._gfx,
+            self.surface,
             self.color,
             self._xfr.position,
             self._props["hat_radius"])
 
         # Barrel
         draw.line(
-            self._gfx,
+            self.surface,
             self.color,
             self._xfr.position,
             Vector2.from_rotation(
@@ -48,7 +46,7 @@ class TankSprite(GameComponent):
 
         h = 40 * (self._props["health"] / 100) - 20
         draw.line(
-            self._gfx,
+            self.surface,
             self.color,
             self._xfr.position - Vector2(-h, -35),
             self._xfr.position - Vector2(20, -35),
@@ -67,5 +65,3 @@ class TankSprite(GameComponent):
         bottom_right = Vector2(bw, bl).rotate(self._xfr.rotation) + self._xfr.position
         return [top_left, top_right, bottom_right, bottom_left]
 
-    def __init__(self, gfx: IDisplayService):
-        self._gfx = gfx

@@ -22,6 +22,7 @@ def bullet_preset(
     }
 
 def tank_preset(
+    name: str,
     controler: IGameComponent,
     position: Vector2,
     rotation: float,
@@ -30,6 +31,7 @@ def tank_preset(
 ) -> Dict:
 
     props = props or {}
+    props["name"] = name
     props.setdefault("hat_rotation", rotation)
     props.setdefault("bullet_speed", 400)
     props.setdefault("fire_cooldown", 5000)
@@ -53,3 +55,15 @@ def tank_preset(
         "TankSprite": {"color": color},
         "BoxCollider": {"size": (props["hat_radius"] * 2, props["hat_radius"] * 2)},
     }
+
+def camera_preset(
+    props: Dict[str, Any] = None,
+) -> Dict:
+    return {
+        "Meta": {"type": "Camera", "props": props},
+        "Transform": None,
+        "Camera": None,
+        "HeadsUpDisplay": None,
+    }
+
+

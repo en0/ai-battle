@@ -2,32 +2,42 @@ import pygame
 from typing import Set
 from ..typing import IGameObject
 from ..game_scene import GameScene
-from ..presets import tank_preset
+from ..presets import tank_preset, camera_preset
 
-from ..components import Tank
+from ..components import Tank, Camera
 
 
 class Battle(GameScene):
 
-    pressed: Set[int] = None
+    _map_surface: pygame.Surface = None
+    _pressed: Set[int] = None
+    _player: IGameObject = None
+    _enemy: IGameObject = None
 
-    player: IGameObject = None
-    enemy: IGameObject = None
+    @property
+    def surface(self) -> pygame.Surface:
+        return self._map_surface
 
     def move(self, event_type, key, mods):
         if pygame.KEYDOWN == event_type:
-            self.pressed.add(key)
+            self._pressed.add(key)
         elif pygame.KEYUP == event_type:
-            self.pressed.remove(key)
+            self._pressed.remove(key)
 
     def fire(self, *a):
-        self.player[Tank].fire()
+        self._player[Tank].fire()
 
     def startup(self) -> None:
 
-        self.pressed = set()
+        #self._map_surface = self.srv_screen.surface.copy()
+        self._map_surface = pygame.Surface((4096, 4096))
 
-        self.player = self.spawn_object(tank_preset(
+        self._pressed = set()
+
+        self._camera = self.spawn_object(camera_preset(), self)
+
+        self._player = self.spawn_object(tank_preset(
+            name="Player 1",
             controler="NoOp",
             position=(100, 100),
             rotation=0,
@@ -35,7 +45,8 @@ class Battle(GameScene):
             #props={"bullet_speed":600}
         ), self)
 
-        self.enemy = self.spawn_object(tank_preset(
+        self._enemy = self.spawn_object(tank_preset(
+            name="Player 2",
             controler="NoOp",
             position=(500, 500),
             rotation=0,
@@ -50,21 +61,25 @@ class Battle(GameScene):
         self.srv_kbd.register_callback(pygame.K_RIGHT, self.move, self.move)
         self.srv_kbd.register_callback(pygame.K_LEFT, self.move, self.move)
         self.srv_kbd.register_callback(pygame.K_RETURN, self.fire)
+        #self.srv_bus.register_callback(pygame.USEREVENT, print)
+
+        self._camera[Camera].track_object(self._player)
 
     def shutdown(self) -> None:
         for go in self.all_objects:
             self.kill_object(go)
 
     def update(self) -> None:
-        if pygame.K_w in self.pressed:
-            self.player[Tank].move(1)
-        if pygame.K_s in self.pressed:
-            self.player[Tank].move(-1)
-        if pygame.K_a in self.pressed:
-            self.player[Tank].turn(-1)
-        if pygame.K_d in self.pressed:
-            self.player[Tank].turn(1)
-        if pygame.K_LEFT in self.pressed:
-            self.player[Tank].turn_hat(-1)
-        if pygame.K_RIGHT in self.pressed:
-            self.player[Tank].turn_hat(1)
+        if pygame.K_w in self._pressed:
+            self._player[Tank].move(1)
+        if pygame.K_s in self._pressed:
+            self._player[Tank].move(-1)
+        if pygame.K_a in self._pressed:
+            self._player[Tank].turn(-1)
+        if pygame.K_d in self._pressed:
+            self._player[Tank].turn(1)
+        if pygame.K_LEFT in self._pressed:
+            self._player[Tank].turn_hat(-1)
+        if pygame.K_RIGHT in self._pressed:
+            self._player[Tank].turn_hat(1)
+

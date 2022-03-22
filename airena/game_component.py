@@ -1,5 +1,7 @@
+import pygame
 from abc import abstractmethod
 from typing import Type, List, Dict, Any
+from .vector import Vector2
 from .typing import IGameComponent, IGameObject, IScene, CallbackDelegate, FilterDelegate
 
 
@@ -23,6 +25,16 @@ class GameComponent(IGameComponent):
 
     def update(self) -> None:
         ...
+
+    # IUnifiedScreenServiceInterface
+
+    @property
+    def surface(self) -> pygame.Surface:
+        return self._owner.surface
+
+    @property
+    def screen_flags(self) -> int:
+        return self._owner.screen_flags
 
     # IUnifiedSceneServiceInterface
 
@@ -91,4 +103,7 @@ class GameComponent(IGameComponent):
 
     def unregister_callback(self, callback: CallbackDelegate) -> None:
         self._owner.unregister_callback(callback)
+
+    def broadcast(self, name: str, **data):
+        self._owner.broadcast(name, **data)
 

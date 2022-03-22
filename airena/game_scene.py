@@ -1,6 +1,7 @@
 import pygame
 from abc import abstractmethod
 from typing import Type, List, Dict, Any
+from .vector import Vector2
 from .typing import (
     CallbackDelegate,
     FilterDelegate,
@@ -12,6 +13,7 @@ from .typing import (
     IObjectService,
     IScene,
     ISceneService,
+    IScreenService,
     IUnifiedServiceInterface,
 )
 
@@ -38,9 +40,21 @@ class GameScene(IScene):
 
     def update_scene(self) -> None:
         self.srv_bus.update(pygame.event.get())
+        self.surface.fill((0, 0, 0))
         self.update()
         self.srv_object.update()
+        self.srv_screen.update()
         self.srv_clock.update(60)
+
+    # IUnifiedScreenServiceInterface
+
+    @property
+    def surface(self) -> pygame.Surface:
+        return self.srv_screen.surface
+
+    @property
+    def screen_flags(self) -> int:
+        return self.srv_screen.screen_flags
 
     # IUnifiedSceneServiceInterface
 
@@ -110,9 +124,13 @@ class GameScene(IScene):
     def unregister_callback(self, callback: CallbackDelegate) -> None:
         self.srv_bus.unregister_callback(callback)
 
+    def broadcast(self, name: str, **data):
+        self.srv_bus.broadcast(name, **data)
+
     def __init__(
         self,
         game: IGame,
+        srv_screen: IScreenService,
         srv_scene: ISceneService,
         srv_object: IObjectService,
         srv_clock: IClockService,
@@ -120,6 +138,7 @@ class GameScene(IScene):
         srv_kbd: IKeyboardService,
     ) -> None:
         self._game = game
+        self.srv_screen = srv_screen
         self.srv_scene = srv_scene
         self.srv_object = srv_object
         self.srv_clock = srv_clock

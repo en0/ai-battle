@@ -14,7 +14,7 @@ from .meta import Meta
 
 class Tank(GameComponent):
 
-    _props: Dict[str, Any]
+    _meta: Meta = None
     _xfr: Transform = None
     _spr: TankSprite
     _fire_bullet = False
@@ -51,50 +51,53 @@ class Tank(GameComponent):
         self._do_move()
 
     def startup(self) -> None:
-        self._props = self.game_object[Meta].props
+        self._meta = self.game_object[Meta]
         self._xfr = self.game_object[Transform]
         self._spr = self.game_object[TankSprite]
         self._box = self.game_object[BoxCollider]
         self._box.on_collision(self._do_collision)
 
+    def shutdown(self):
+        self.broadcast("Tank:killed", owner=self.game_object)
+
     def _do_collision(self, go: IGameObject):
         if go[Meta].type == "Bullet":
-            self._props["health"] -= go[Meta].props["damage"]
-            if self._props["health"] <= 0:
+            self._meta["health"] -= go[Meta]["damage"]
+            if self._meta["health"] <= 0:
                 self.kill_object(self.game_object)
 
     def _do_fire(self) -> None:
         if self.can_fire and self._fire_bullet:
 
             bullet_position = Vector2.from_rotation(
-                self._props["hat_rotation"],
-                self._props["barrel_length"] + 25
+                self._meta["hat_rotation"],
+                self._meta["barrel_length"] + 25
             ) + self._xfr.position
 
             self._fire_bullet = False
-            self._next_fire_ts = self.now_ms + self._props["fire_cooldown"]
+            self._next_fire_ts = self.now_ms + self._meta["fire_cooldown"]
             self.spawn_object(bullet_preset(
                 position=bullet_position,
-                rotation=self._props["hat_rotation"],
-                vector=Vector2.from_rotation(self._props["hat_rotation"]),
-                speed=self._props["bullet_speed"],
+                rotation=self._meta["hat_rotation"],
+                vector=Vector2.from_rotation(self._meta["hat_rotation"]),
+                speed=self._meta["bullet_speed"],
                 color=self._spr.color), self.game_object)
 
     def _do_turn(self) -> None:
-        turn_speed = self._props["turn_speed"]
+        turn_speed = self._meta["turn_speed"]
         rotation = self._turn_vector * turn_speed * self.frame_delay
         self._xfr.rotation += rotation
-        self._props["hat_rotation"] += rotation
+        self._meta["hat_rotation"] += rotation
         self._turn_vector = 0
 
     def _do_hat_turn(self) -> None:
-        turn_speed = self._props["turn_speed"]
+        turn_speed = self._meta["turn_speed"]
         rotation = self._hat_turn_vector * turn_speed * self.frame_delay
-        self._props["hat_rotation"] += rotation
+        self._meta["hat_rotation"] += rotation
         self._hat_turn_vector = 0
 
     def _do_move(self) -> None:
-        move_speed = self._props["movement_speed"]
+        move_speed = self._meta["movement_speed"]
         vector = self._movement_vector * move_speed * self.frame_delay
         self._xfr.position += vector
         self._movement_vector = 0
